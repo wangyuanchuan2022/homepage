@@ -60,8 +60,9 @@ check('parseSections: body without any ## stays one untitled section', () => {
   assert.ok(secs[0].content.includes('只有正文。'))
 })
 
-check('chapterWordCount: whitespace excluded, punctuation included, headings excluded', () => {
-  assert.equal(chapterWordCount('## 节1\n\nAB CD\n\n中文。'), 9) // 节1ABCD中文。
+check('chapterWordCount: whitespace excluded, punctuation included, heading lines excluded', () => {
+  assert.equal(chapterWordCount('## 节1\n\nAB CD\n\n中文。'), 7) // ABCD中文。
+  assert.equal(chapterWordCount('# 第一章　配给照旧\n\n正文。'), 3) // 全文标题行整行剔除，只计正文。
   assert.equal(chapterWordCount(''), 0)
 })
 

@@ -26,15 +26,15 @@ def check(name, ok, detail=""):
 
 
 # Expected word count computed from the source manuscript (same rule as novelsCore.ts:
-# strip md heading markers, strip all whitespace, count the rest, punctuation included).
+# drop whole md heading lines, strip all whitespace, count the rest, punctuation included).
 SRC = os.path.join(ROOT, "src", "content", "novels", "duanlian-ch01.md")
 with open(SRC, "r", encoding="utf-8") as f:
     raw = f.read()
 m = re.match(r"^---\n[\s\S]*?\n---\n", raw)
 body = raw[m.end():] if m else raw
-EXPECTED_WORDS = len(re.sub(r"\s+", "", re.sub(r"^#{1,6}\s+", "", body, flags=re.M)))
+EXPECTED_WORDS = len(re.sub(r"\s+", "", re.sub(r"^#{1,6}\s+.+$", "", body, flags=re.M)))
 EXPECTED_FMT = f"{EXPECTED_WORDS:,}"
-SECTION_TITLES = ["节1-配给照旧", "节2-锅不够分", "节3-三倍", "节4-一盏灯", "节5-照账", "节6-不动声色"]
+SECTION_TITLES = ["一", "二", "三", "四", "五", "六", "七", "八", "九"]
 
 
 def main():
@@ -69,24 +69,32 @@ def main():
         # ---- chapter reading page ----
         page.goto(URL + "#/novels/duanlian-ch01")
         page.wait_for_timeout(600)
-        check("detail: h1 title", page.locator("article h1").inner_text().strip() == "第一章")
+        check("detail: h1 title", page.locator("article h1").inner_text().strip() == "第一章　配给照旧")
         check("detail: book title shown", page.locator("article").inner_text().find("《断链》") >= 0)
         check("detail: meta shows expected word count", page.locator("article").inner_text().find(EXPECTED_FMT) >= 0, EXPECTED_FMT)
-        check("detail: six sections rendered", page.locator("article > section").count() == 6)
+        check("detail: ten sections rendered (epigraph + 9)", page.locator("article > section").count() == 10)
         h2_texts = page.locator(".post-md h2").all_inner_texts()
-        check("detail: six section headings verbatim", h2_texts == SECTION_TITLES, str(h2_texts))
+        check("detail: nine section headings verbatim", h2_texts == SECTION_TITLES, str(h2_texts))
         body_text = page.locator("article").inner_text()
-        check("detail: opening line present", body_text.find("围城第二十一天，卯时。") >= 0)
-        check("detail: closing line present", body_text.find("还亮到后半夜。") >= 0)
+        check("detail: chronicle opening present", body_text.find("承平四十二年，朔风城，围城第一月。") >= 0)
+        check("detail: chronicle closing present", body_text.find("围城一月，城中无一人言降。") >= 0)
 
-        # dialogue: one utterance per line must stay separate lines (breaks renderer)
-        para = page.locator(".post-md p", has_text="老赵。").first
-        html = para.evaluate("el => el.innerHTML")
-        check("detail: dialogue soft breaks preserved", html.count("<br") >= 5, html[:80])
+        # dialogue: blank-line separated utterances must stay separate paragraphs
+        merged = page.locator(".post-md p", has_text="先学会不像人").first.inner_text()
+        check(
+            "detail: dialogue kept as separate paragraphs (not merged)",
+            merged.find("我不会数") == -1 and merged.find("老赵。") == -1,
+            merged[:60],
+        )
+        check(
+            "detail: dialogue section paragraph count",
+            page.locator("#sec-3 .post-md p").count() >= 20,
+            str(page.locator("#sec-3 .post-md p").count()),
+        )
 
         # TOC: six entries, first label correct, click scrolls
         toc_btns = page.locator("nav[aria-label='本章节目'] button")
-        check("detail: TOC has six entries", toc_btns.count() == 6, str(toc_btns.count()))
+        check("detail: TOC has one entry per section", toc_btns.count() == len(SECTION_TITLES), str(toc_btns.count()))
         if toc_btns.count() == 6:
             check("detail: TOC first label", toc_btns.nth(0).inner_text().strip() == SECTION_TITLES[0])
             check("detail: TOC last label", toc_btns.nth(5).inner_text().strip() == SECTION_TITLES[5])

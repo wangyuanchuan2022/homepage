@@ -26,16 +26,18 @@ export interface ChapterSection {
 /**
  * Split a chapter body into sections at '## ' headings.
  * - a redundant leading '# ' title line is dropped (the page header renders the title)
- * - content before the first '## ' heading becomes an untitled section (title: '')
- * - section ids are stable by order, not by content
+ * - content before the first '## ' heading becomes an untitled epigraph section (id 'sec-0')
+ * - titled sections get sequential ids sec-1, sec-2, ... by heading order
  */
 export function parseSections(body: string): ChapterSection[] {
   const stripped = body.replace(/^#\s+.+\n+/, '')
   const sections: ChapterSection[] = []
+  let headings = 0
   for (const line of stripped.split('\n')) {
     const heading = line.match(/^##\s+(.+?)\s*$/)
     if (heading) {
-      sections.push({ id: `sec-${sections.length + 1}`, title: heading[1], content: '' })
+      headings += 1
+      sections.push({ id: `sec-${headings}`, title: heading[1], content: '' })
     } else if (sections.length === 0) {
       sections.push({ id: 'sec-0', title: '', content: line + '\n' })
     } else {
@@ -45,10 +47,11 @@ export function parseSections(body: string): ChapterSection[] {
   return sections
 }
 
-/** Non-whitespace char count (punctuation included); md heading markers excluded. */
+/** Non-whitespace char count (punctuation included); whole md heading lines excluded
+ *  (headings are structural — chapter/section titles must not inflate the count). */
 export function chapterWordCount(body: string): number {
   return body
-    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/^#{1,6}\s+.+$/gm, '')
     .replace(/\s+/g, '').length
 }
 
