@@ -1,0 +1,10 @@
+# build artifacts & local state (source-of-truth is src/, rebuild reproduces all of these)
+node_modules/
+dist/
+dist-single/
+qa/
+.tmp-build/
+.deploy/
+*.local
+.DS_Store
+Thumbs.db

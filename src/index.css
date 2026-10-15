@@ -1,0 +1,204 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  @apply bg-bg text-ink font-mono antialiased;
+  /* Page continuity: one shared atmospheric field behind every section. */
+  background-image:
+    radial-gradient(1100px 520px at 78% -8%, rgba(232, 181, 74, 0.075), transparent 62%),
+    radial-gradient(900px 600px at -12% 34%, rgba(232, 181, 74, 0.04), transparent 60%),
+    radial-gradient(rgba(232, 181, 74, 0.05) 1px, transparent 1px);
+  background-size: auto, auto, 26px 26px;
+  background-attachment: fixed;
+}
+
+::selection {
+  background: rgba(232, 181, 74, 0.32);
+  color: #fff8e8;
+}
+
+/* Terminal-style caret */
+.caret::after {
+  content: '▍';
+  @apply text-amber;
+  animation: blink 1.06s steps(1) infinite;
+}
+.caret-idle::after {
+  content: '▍';
+  @apply text-faint;
+  animation: blink 1.3s steps(1) infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .caret::after,
+  .caret-idle::after {
+    animation: none;
+  }
+}
+
+/* Focus visibility */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid rgba(232, 181, 74, 0.65);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Scrollbar — quiet, warm */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #26241f;
+  border-radius: 6px;
+  border: 2px solid #0b0c0f;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a362c;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------- Inline editor chrome (adapted from personal-homepage-skill) ---------- */
+.editor-hotzone {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 34px;
+  height: 72px;
+  z-index: 60;
+}
+.editor-controls {
+  position: fixed;
+  top: 10px;
+  left: 8px;
+  z-index: 61;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  pointer-events: none;
+}
+.editor-hotzone:hover + .editor-controls,
+.editor-controls:hover,
+body.editing .editor-controls {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.editor-button {
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 5px 10px;
+  color: #e6e1d5;
+  background: rgba(16, 18, 24, 0.92);
+  border: 1px solid rgba(232, 181, 74, 0.4);
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+.editor-button:hover {
+  border-color: rgba(232, 181, 74, 0.8);
+  color: #f5cd7a;
+}
+body.editing [data-edit-id] {
+  outline: 1px dashed rgba(232, 181, 74, 0.45);
+  outline-offset: 3px;
+  cursor: text;
+  min-height: 1em;
+}
+@media print {
+  .editor-hotzone,
+  .editor-controls {
+    display: none;
+  }
+}
+
+/* ---------- Blog post markdown (.post-md) ---------- */
+.post-md {
+  @apply text-[14px] leading-7 text-ink/90;
+}
+.post-md h1,
+.post-md h2,
+.post-md h3,
+.post-md h4 {
+  @apply font-bold text-ink;
+}
+.post-md h1 {
+  @apply mb-4 mt-8 text-2xl tracking-tighter2;
+}
+.post-md h2 {
+  @apply mb-3 mt-8 border-t border-linedim pt-6 text-xl tracking-tighter2;
+}
+.post-md h3 {
+  @apply mb-2 mt-6 text-lg;
+}
+.post-md h4 {
+  @apply mb-2 mt-4 text-base text-amber;
+}
+.post-md p {
+  @apply my-4;
+}
+.post-md a {
+  @apply text-amber underline decoration-line underline-offset-4 hover:text-amber-bright;
+}
+.post-md ul {
+  @apply my-4 list-disc space-y-1.5 pl-6;
+}
+.post-md ol {
+  @apply my-4 list-decimal space-y-1.5 pl-6;
+}
+.post-md li::marker {
+  @apply text-amber;
+}
+.post-md code {
+  @apply rounded-sm border border-linedim bg-panel px-1.5 py-0.5 text-[12.5px] text-amber-bright;
+}
+.post-md pre {
+  @apply my-5 overflow-x-auto rounded-lg border border-linedim bg-panel p-4;
+}
+.post-md pre code {
+  @apply border-0 bg-transparent p-0 text-[12.5px] leading-6 text-ink/85;
+}
+.post-md blockquote {
+  @apply my-4 border-l-2 border-line pl-4 text-dim;
+}
+.post-md img {
+  @apply my-5 max-w-full rounded-lg border border-linedim;
+}
+.post-md hr {
+  @apply my-8 border-linedim;
+}
+.post-md table {
+  @apply my-5 w-full border-collapse text-[13px];
+}
+.post-md th,
+.post-md td {
+  @apply border border-linedim px-3 py-1.5 text-left;
+}
+.post-md th {
+  @apply text-amber;
+}
